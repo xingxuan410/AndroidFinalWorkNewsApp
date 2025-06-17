@@ -1,0 +1,51 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".AddNewsFragment">
+
+    <EditText
+        android:id="@+id/edit_text_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="标题"
+        android:inputType="textCapSentences"
+        android:layout_marginBottom="8dp"/>
+
+    <EditText
+        android:id="@+id/edit_text_summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="摘要"
+        android:inputType="textMultiLine"
+        android:minLines="2"
+        android:layout_marginBottom="8dp"/>
+
+    <EditText
+        android:id="@+id/edit_text_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:hint="内容"
+        android:gravity="top"
+        android:inputType="textMultiLine"
+        android:minLines="5"
+        android:layout_marginBottom="8dp"/>
+
+    <EditText
+        android:id="@+id/edit_text_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="日期 (例如: YYYY-MM-DD)"
+        android:inputType="date"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/button_save_news"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="保存新闻"/>
+
+</LinearLayout>

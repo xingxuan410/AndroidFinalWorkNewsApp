@@ -1,0 +1,51 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+ext {
+    room_version = "2.6.1" // 或者你希望使用的 Room 版本
+    nav_version = "2.7.7"  // 如果你也定义了 nav_version，确保它也被定义
+    // 其他你可能定义的版本变量
+}
+android {
+    namespace 'com.example.newsapp'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.example.newsapp"
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+// Room
+    implementation "androidx.room:room-runtime:$room_version" // Gradle 现在可以找到 room_version
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+
+
+
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.activity
+    implementation libs.constraintlayout
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+    implementation 'androidx.navigation:navigation-fragment:2.5.3'
+    implementation 'androidx.navigation:navigation-ui:2.5.3'
+}
