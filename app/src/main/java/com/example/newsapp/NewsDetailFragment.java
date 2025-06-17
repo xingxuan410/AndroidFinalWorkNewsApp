@@ -2,36 +2,32 @@
 package com.example.newsapp;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 public class NewsDetailFragment extends Fragment {
 
-    private static final String DB_TAG = "App_DB_Log"; // 统一数据库 TAG
-
-    private int newsId = -1;
     private TextView titleTextView;
     private TextView dateTextView;
     private TextView contentTextView;
-    private NewsDao newsDao;
+    private NewsRepository newsRepository;
+    private SharedViewModel sharedViewModel;
+    private int newsId = -1;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        newsRepository = new NewsRepository(requireActivity().getApplication());
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+
         if (getArguments() != null) {
             newsId = getArguments().getInt("newsId", -1);
-        }
-        if (getContext() != null) {
-            newsDao = NewsDatabase.getDatabase(requireContext()).newsDao();
         }
     }
 
@@ -50,54 +46,36 @@ public class NewsDetailFragment extends Fragment {
         dateTextView = view.findViewById(R.id.text_news_date);
         contentTextView = view.findViewById(R.id.text_news_content);
 
-        if (newsId != -1) {
-            loadNewsById(newsId);
+        boolean isLargeScreen = requireActivity().findViewById(R.id.news_detail_container) != null;
+
+        if (isLargeScreen) {
+            // 在大屏幕上，观察来自 SharedViewModel 的选择
+            sharedViewModel.getSelectedNewsId().observe(getViewLifecycleOwner(), id -> {
+                if (id != null) {
+                    loadNewsById(id);
+                }
+            });
         } else {
-            displayNews(null);
+            // 在小屏幕上，使用来自 arguments 的 ID
+            if (newsId != -1) {
+                loadNewsById(newsId);
+            }
         }
     }
 
     private void loadNewsById(int id) {
-        if (newsDao == null) {
-            displayNews(null);
-            return;
-        }
-        NewsDatabase.databaseWriteExecutor.execute(() -> {
-            // Log.i(DB_TAG, "数据库操作开始: 尝试通过ID获取新闻: " + id + "，线程: " + Thread.currentThread().getName());
-            News news = null;
-            try {
-                news = newsDao.getNewsById(id);
-                if (news != null) {
-                    Log.i(DB_TAG, "数据库操作成功: 通过ID " + id + " 获取到新闻: " + news.getTitle());
-                } else {
-                    Log.w(DB_TAG, "数据库操作结果: 未找到ID为 " + id + " 的新闻");
-                }
-            } catch (Exception e) {
-                Log.e(DB_TAG, "数据库操作错误: 通过ID " + id + " 获取新闻失败", e);
-            }
-            final News resultNews = news;
-            if (isAdded() && getActivity() != null) {
-                new Handler(Looper.getMainLooper()).post(() -> displayNews(resultNews));
-            }
-        });
+        newsRepository.getNewsById(id).observe(getViewLifecycleOwner(), this::displayNews);
     }
 
     public void displayNews(News news) {
-        if (!isAdded()) {
-            return;
-        }
         if (news != null) {
-            if (titleTextView != null) {
-                titleTextView.setText(news.getTitle());
-                dateTextView.setText(news.getDate());
-                contentTextView.setText(news.getContent());
-            }
+            titleTextView.setText(news.getTitle());
+            dateTextView.setText(news.getDate());
+            contentTextView.setText(news.getContent());
         } else {
-            if (titleTextView != null) {
-                titleTextView.setText("新闻未找到");
-                dateTextView.setText("");
-                contentTextView.setText("");
-            }
+            titleTextView.setText("新闻未找到");
+            dateTextView.setText("");
+            contentTextView.setText("");
         }
     }
 }

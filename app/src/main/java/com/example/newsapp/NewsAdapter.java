@@ -4,28 +4,38 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
-import java.util.ArrayList;
+public class NewsAdapter extends ListAdapter<News, NewsAdapter.NewsViewHolder> {
 
-public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder> {
-
-
-    private List<News> newsList = new ArrayList<>(); // 初始化以避免空指针
-    private OnNewsClickListener listener;
-
+    private final OnNewsClickListener listener;
 
     public interface OnNewsClickListener {
         void onNewsClick(News news);
     }
 
-    public NewsAdapter(List<News> newsList, OnNewsClickListener listener) {
-        this.newsList = newsList != null ? newsList : new ArrayList<>(); // 安全处理
+    public NewsAdapter(@NonNull OnNewsClickListener listener) {
+        super(DIFF_CALLBACK);
         this.listener = listener;
     }
+
+    // DiffUtil 计算差异以实现高效的动画效果
+    private static final DiffUtil.ItemCallback<News> DIFF_CALLBACK = new DiffUtil.ItemCallback<News>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull News oldItem, @NonNull News newItem) {
+            return oldItem.getId() == newItem.getId();
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull News oldItem, @NonNull News newItem) {
+            return oldItem.getTitle().equals(newItem.getTitle()) &&
+                    oldItem.getSummary().equals(newItem.getSummary()) &&
+                    oldItem.getDate().equals(newItem.getDate());
+        }
+    };
 
     @NonNull
     @Override
@@ -36,21 +46,8 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
-        News news = newsList.get(position);
-        holder.titleTextView.setText(news.getTitle());
-        holder.summaryTextView.setText(news.getSummary());
-        holder.dateTextView.setText(news.getDate());
-
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onNewsClick(news);
-            }
-        });
-    }
-
-    @Override
-    public int getItemCount() {
-        return newsList.size();
+        News news = getItem(position);
+        holder.bind(news, listener);
     }
 
     static class NewsViewHolder extends RecyclerView.ViewHolder {
@@ -65,9 +62,11 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
             dateTextView = itemView.findViewById(R.id.text_news_date);
         }
 
-    }
-    public void setNewsList(List<News> newsList) {
-        this.newsList = newsList != null ? newsList : new ArrayList<>();
-        notifyDataSetChanged(); // 通知 RecyclerView 数据已更改
+        public void bind(final News news, final OnNewsClickListener listener) {
+            titleTextView.setText(news.getTitle());
+            summaryTextView.setText(news.getSummary());
+            dateTextView.setText(news.getDate());
+            itemView.setOnClickListener(v -> listener.onNewsClick(news));
+        }
     }
 }

@@ -9,7 +9,12 @@ import androidx.room.Query;
 import androidx.room.Update;
 
 import java.util.List;
+import androidx.lifecycle.LiveData;
+import androidx.room.Dao;
+import androidx.room.Insert;
+import androidx.room.Query;
 
+import java.util.List;
 @Dao
 public interface NewsDao {
 
@@ -26,12 +31,12 @@ public interface NewsDao {
     void deleteAllNews();
 
     @Query("SELECT * FROM news_table ORDER BY date DESC")
-    List<News> getAllNews(); // 或者 LiveData<List<News>> getAllNews();
+    LiveData<List<News>> getAllNews();
 
     @Query("SELECT * FROM news_table WHERE id = :newsId")
-    News getNewsById(int newsId); // 或者 LiveData<News> getNewsById(int newsId);
+    LiveData<News> getNewsById(int newsId);
 
     // 新增：用于搜索新闻的方法
     @Query("SELECT * FROM news_table WHERE title LIKE :query OR summary LIKE :query OR content LIKE :query ORDER BY date DESC")
-    List<News> searchNews(String query); // 或者 LiveData<List<News>> searchNews(String query);
+    LiveData<List<News>> searchNews(String query);
 }

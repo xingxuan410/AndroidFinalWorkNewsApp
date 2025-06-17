@@ -1,10 +1,6 @@
-// 文件名: AddNewsFragment.java
 package com.example.newsapp;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,21 +20,17 @@ import java.util.Locale;
 
 public class AddNewsFragment extends Fragment {
 
-    private static final String DB_TAG = "App_DB_Log"; // 统一数据库 TAG
-
     private EditText editTextTitle;
     private EditText editTextSummary;
     private EditText editTextContent;
     private EditText editTextDate;
-    private Button buttonSaveNews;
-    private NewsDao newsDao;
-    private SharedViewModel sharedViewModel;
+    private NewsListViewModel newsListViewModel; // 复用已有的 ViewModel
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        newsDao = NewsDatabase.getDatabase(requireContext()).newsDao();
-        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        // 获取 Activity 作用域的 ViewModel
+        newsListViewModel = new ViewModelProvider(requireActivity()).get(NewsListViewModel.class);
     }
 
     @Nullable
@@ -55,7 +47,7 @@ public class AddNewsFragment extends Fragment {
         editTextSummary = view.findViewById(R.id.edit_text_summary);
         editTextContent = view.findViewById(R.id.edit_text_content);
         editTextDate = view.findViewById(R.id.edit_text_date);
-        buttonSaveNews = view.findViewById(R.id.button_save_news);
+        Button buttonSaveNews = view.findViewById(R.id.button_save_news);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String currentDate = sdf.format(new Date());
@@ -77,29 +69,20 @@ public class AddNewsFragment extends Fragment {
 
         News news = new News(title, summary, content, date);
 
-        NewsDatabase.databaseWriteExecutor.execute(() -> {
-            // Log.i(DB_TAG, "数据库操作开始: 尝试插入新闻: " + news.getTitle() + "，线程: " + Thread.currentThread().getName()); // 如果需要非常详细的开始日志
-            try {
-                newsDao.insert(news);
-                Log.i(DB_TAG, "数据库操作成功: 新闻已插入: " + news.getTitle());
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    Toast.makeText(getContext(), "新闻已保存", Toast.LENGTH_SHORT).show();
-                    sharedViewModel.setNewsUpdated(true);
-                    boolean isLargeScreen = requireActivity().findViewById(R.id.news_detail_container) != null;
-                    if (isLargeScreen) {
-                        if (isAdded() && getActivity() != null) {
-                            requireActivity().getSupportFragmentManager().popBackStack();
-                        }
-                    } else if (getView() != null && isAdded()) {
-                        Navigation.findNavController(getView()).popBackStack();
-                    }
-                });
-            } catch (Exception e) {
-                Log.e(DB_TAG, "数据库操作错误: 插入新闻失败: " + news.getTitle(), e);
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    Toast.makeText(getContext(), "保存新闻失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+        // 使用 ViewModel 插入数据。这里不再需要 Executors 或 Handlers。
+        newsListViewModel.insert(news);
+
+        Toast.makeText(getContext(), "新闻已保存", Toast.LENGTH_SHORT).show();
+
+        // 导航返回
+        // 列表将通过 LiveData 自动更新，不再需要标志位。
+        if (getView() != null) {
+            boolean isLargeScreen = requireActivity().findViewById(R.id.news_detail_container) != null;
+            if(isLargeScreen){
+                requireActivity().getSupportFragmentManager().popBackStack();
+            } else {
+                Navigation.findNavController(getView()).popBackStack();
             }
-        });
+        }
     }
 }
