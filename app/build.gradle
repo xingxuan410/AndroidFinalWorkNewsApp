@@ -1,11 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
 }
+
 ext {
-    room_version = "2.6.1" // 或者你希望使用的 Room 版本
-    nav_version = "2.7.7"  // 如果你也定义了 nav_version，确保它也被定义
-    // 其他你可能定义的版本变量
+    room_version = "2.6.1"
+    nav_version = "2.7.7" // 建议更新到较新版本以获得 bug 修复和新功能
 }
+
 android {
     namespace 'com.example.newsapp'
     compileSdk 35
@@ -16,7 +17,6 @@ android {
         targetSdk 35
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -27,18 +27,25 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8 // 保持 1.8 即可，无需 11
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
-// Room
-    implementation "androidx.room:room-runtime:$room_version" // Gradle 现在可以找到 room_version
+    // Room
+    implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
 
+    // Navigation
+    implementation "androidx.navigation:navigation-fragment:$nav_version"
+    implementation "androidx.navigation:navigation-ui:$nav_version"
 
+    // 新增：Retrofit 和 Gson 用于网络请求
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
+    // 默认依赖
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
@@ -46,6 +53,4 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
-    implementation 'androidx.navigation:navigation-fragment:2.5.3'
-    implementation 'androidx.navigation:navigation-ui:2.5.3'
 }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">NewsApp</string>
+    <string name="news_not_found">新闻未找到</string>
 </resources>

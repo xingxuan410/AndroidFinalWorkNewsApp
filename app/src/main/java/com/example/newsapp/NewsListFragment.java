@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -24,7 +26,6 @@ public class NewsListFragment extends Fragment implements NewsAdapter.OnNewsClic
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // ViewModel 作用域为 Activity，以便在 Fragment 间共享
         newsListViewModel = new ViewModelProvider(requireActivity()).get(NewsListViewModel.class);
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
     }
@@ -44,15 +45,17 @@ public class NewsListFragment extends Fragment implements NewsAdapter.OnNewsClic
         setupSearchView(view);
         setupFabs(view);
 
-        // 从 ViewModel 观察新闻列表
         newsListViewModel.newsList.observe(getViewLifecycleOwner(), news -> {
             adapter.submitList(news);
-
-            // 对于大屏幕，如果详情视图为空，则自动选择第一项
             if (isLargeScreen && !news.isEmpty() && sharedViewModel.getSelectedNewsId().getValue() == null) {
                 sharedViewModel.selectNews(news.get(0).getId());
             }
         });
+
+        // 首次加载时自动刷新一次新闻
+        if (savedInstanceState == null) {
+            newsListViewModel.refreshNewsFromApi();
+        }
     }
 
     private void setupRecyclerView(@NonNull View view) {
@@ -67,20 +70,19 @@ public class NewsListFragment extends Fragment implements NewsAdapter.OnNewsClic
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // ViewModel 处理搜索
                 newsListViewModel.setSearchQuery(query);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // ViewModel 处理搜索
                 newsListViewModel.setSearchQuery(newText);
                 return true;
             }
         });
     }
 
+    // 更新：添加刷新按钮的逻辑
     private void setupFabs(@NonNull View view) {
         FloatingActionButton fabAddNews = view.findViewById(R.id.fab_add_news);
         fabAddNews.setOnClickListener(v -> {
@@ -93,6 +95,16 @@ public class NewsListFragment extends Fragment implements NewsAdapter.OnNewsClic
                 Navigation.findNavController(view).navigate(R.id.action_newsListFragment_to_addNewsFragment);
             }
         });
+
+        // 你需要在 fragment_news_list.xml 布局文件中添加一个新的 FloatingActionButton
+        // 其 ID 应该是 "fab_refresh_news"
+        FloatingActionButton fabRefreshNews = view.findViewById(R.id.fab_refresh_news);
+        if (fabRefreshNews != null) {
+            fabRefreshNews.setOnClickListener(v -> {
+                Toast.makeText(getContext(), "正在刷新新闻...", Toast.LENGTH_SHORT).show();
+                newsListViewModel.refreshNewsFromApi();
+            });
+        }
     }
 
     @Override

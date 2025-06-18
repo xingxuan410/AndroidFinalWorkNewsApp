@@ -2,30 +2,54 @@
 package com.example.newsapp;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;  // <-- 【新增】导入 @Ignore 注解
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "news_table") // 定义表名
+@Entity(tableName = "news_table")
 public class News {
 
-    @PrimaryKey(autoGenerate = true) // 设置 id 为主键并自动生成
+    @PrimaryKey(autoGenerate = true)
     private int id;
 
     private String title;
     private String summary;
     private String content;
     private String date;
+    private String url; // 新增的url字段
 
-    // 构造函数，注意 Room 需要一个无参构造函数，或者所有字段都有 getter/setter
-    // 为了方便，我们保留这个构造函数，并确保 Room 可以通过字段或 getter/setter 访问它们
-    public News(String title, String summary, String content, String date) {
+    /**
+     * 【新增】Room需要一个无参构造函数。
+     * 我们可以添加一个，或者确保Room能通过其他构造函数和setter方法工作。
+     * 为了清晰和安全，我们显式添加一个。
+     */
+    public News() {
+    }
+
+    /**
+     * 【新增】这是我们的新构造函数，包含了所有字段。
+     * 这是我们从网络获取数据时，推荐使用的构造函数。
+     */
+    @Ignore // <-- 【关键】告诉Room忽略这个构造函数，避免混淆
+    public News(String title, String summary, String content, String date, String url) {
         this.title = title;
         this.summary = summary;
         this.content = content;
         this.date = date;
+        this.url = url;
     }
 
-    // Room 需要 getter 和 setter 方法来访问字段，或者字段本身是 public 的
-    // (为了保持封装性，推荐使用 getter/setter)
+    /**
+     * 【保留】这是你原来的构造函数，我们把它保留下来，并让它调用新的构造函数。
+     * 这样可以保持向后兼容性，旧代码调用它时，url字段会默认为null。
+     */
+    @Ignore // <-- 【关键】告诉Room也忽略这个构造函数
+    public News(String title, String summary, String content, String date) {
+        // 调用上面的全参数构造函数，url传null
+        this(title, summary, content, date, null);
+    }
+
+    // --- Getter 和 Setter 方法保持不变 ---
+
     public int getId() {
         return id;
     }
@@ -64,5 +88,14 @@ public class News {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    // 新增url的getter和setter
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }
