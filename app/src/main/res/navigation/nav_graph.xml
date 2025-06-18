@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_newsListFragment_to_addNewsFragment"
             app:destination="@id/addNewsFragment" />
+        <action
+            android:id="@+id/action_newsListFragment_to_favoritesFragment"
+            app:destination="@id/favoritesFragment" />
     </fragment>
 
     <fragment
@@ -27,9 +30,20 @@
             android:name="newsId"
             app:argType="integer" />
     </fragment>
+
     <fragment
         android:id="@+id/addNewsFragment"
         android:name="com.example.newsapp.AddNewsFragment"
         android:label="fragment_add_news"
         tools:layout="@layout/fragment_add_news" />
+
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.example.newsapp.FavoritesFragment"
+        android:label="fragment_favorites"
+        tools:layout="@layout/fragment_favorites" />
+
+    <action android:id="@+id/action_global_newsDetailFragment"
+        app:destination="@id/newsDetailFragment"/>
+
 </navigation>
