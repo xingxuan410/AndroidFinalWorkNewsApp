@@ -22,6 +22,6 @@
 ## 🛠️ 技术超能装备
 宇宙最强开发组合：
 ☕ JDK 21 
-📦 Android SDK 34 
+📦 Android SDK 35 
 🧩 Gradle 8.10.2 
 🚀 AGP 8.8.0
