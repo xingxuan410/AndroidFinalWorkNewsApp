@@ -1,6 +1,8 @@
 package com.example.newsapp;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,24 +12,28 @@ import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView; // <-- 【新增】导入
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 public class NewsDetailFragment extends Fragment {
 
-    // 【修改】声明新增的视图控件
+    // 声明所有视图控件
     private TextView titleTextView;
     private TextView dateTextView;
     private TextView contentTextView;
     private Button readMoreButton;
     private WebView webView;
+    private NestedScrollView summaryScrollView; // <-- 【新增】声明摘要滚动视图
 
     private NewsRepository newsRepository;
     private SharedViewModel sharedViewModel;
     private int newsId = -1;
     private String articleUrl = "";
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        // ... onCreate 方法保持不变 ...
         super.onCreate(savedInstanceState);
         newsRepository = new NewsRepository(requireActivity().getApplication());
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
@@ -44,50 +50,44 @@ public class NewsDetailFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_news_detail, container, false);
     }
 
+    @SuppressLint("SetJavaScriptEnabled") // 将注解移到方法上，覆盖整个方法
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 【修改】获取所有视图控件的引用，包括新增的
+        // 获取所有视图控件的引用
+        summaryScrollView = view.findViewById(R.id.summary_scroll_view); // <-- 【新增】获取摘要滚动视图
         titleTextView = view.findViewById(R.id.text_news_title);
         dateTextView = view.findViewById(R.id.text_news_date);
         contentTextView = view.findViewById(R.id.text_news_content);
-        readMoreButton = view.findViewById(R.id.button_read_full_article); // <-- 【新增】获取按钮
-        webView = view.findViewById(R.id.webView_full_article);           // <-- 【新增】获取WebView
-
+        readMoreButton = view.findViewById(R.id.button_read_full_article);
+        webView = view.findViewById(R.id.fullscreen_webView);
+        contentTextView.setMovementMethod(new ScrollingMovementMethod());
+        // ... 大小屏幕判断逻辑保持不变 ...
         boolean isLargeScreen = requireActivity().findViewById(R.id.news_detail_container) != null;
-
         if (isLargeScreen) {
-            // 在大屏幕上，观察来自 SharedViewModel 的选择
             sharedViewModel.getSelectedNewsId().observe(getViewLifecycleOwner(), id -> {
                 if (id != null) {
                     loadNewsById(id);
                 }
             });
         } else {
-            // 在小屏幕上，使用来自 arguments 的 ID
             if (newsId != -1) {
                 loadNewsById(newsId);
             }
         }
 
-        // 【新增】设置按钮的点击监听器
+        // 【修改】按钮点击逻辑
         readMoreButton.setOnClickListener(v -> {
-            // 检查URL是否有效
+            // URL检查保持不变
             if (articleUrl != null && !articleUrl.isEmpty()) {
-                // 隐藏摘要和按钮
-                contentTextView.setVisibility(View.GONE);
-                readMoreButton.setVisibility(View.GONE);
+                // 【修改】隐藏整个摘要滚动视图
+                summaryScrollView.setVisibility(View.GONE);
 
                 // 显示并配置WebView
                 webView.setVisibility(View.VISIBLE);
-
-                // 启用JavaScript，很多现代网页需要它
                 webView.getSettings().setJavaScriptEnabled(true);
-                // 设置WebViewClient，这样链接会在你的WebView中打开，而不是跳到外部浏览器
                 webView.setWebViewClient(new WebViewClient());
-
-                // 加载完整新闻的URL
                 webView.loadUrl(articleUrl);
             }
         });
@@ -98,7 +98,6 @@ public class NewsDetailFragment extends Fragment {
     }
 
     public void displayNews(News news) {
-        // 【修改】当显示新闻时，重置UI状态
         resetUIState();
 
         if (news != null) {
@@ -106,27 +105,29 @@ public class NewsDetailFragment extends Fragment {
             dateTextView.setText(news.getDate());
             contentTextView.setText(news.getContent());
 
-            // 【新增】保存新闻的URL，并确保按钮可见
-            this.articleUrl = news.getUrl(); // <-- 假设你的News类有 getUrl() 方法
-            readMoreButton.setVisibility(View.VISIBLE);
+            this.articleUrl = news.getUrl();
+
+            // 【关键修复】根据URL是否存在来决定按钮的可见性
+            if (this.articleUrl != null && !this.articleUrl.isEmpty()) {
+                readMoreButton.setVisibility(View.VISIBLE);
+            } else {
+                readMoreButton.setVisibility(View.GONE);
+            }
 
         } else {
-            titleTextView.setText(R.string.news_not_found); // <-- 使用字符串资源
+            titleTextView.setText(R.string.news_not_found);
             dateTextView.setText("");
             contentTextView.setText("");
-
-            // 【新增】如果新闻未找到，隐藏按钮
-            readMoreButton.setVisibility(View.GONE);
+            readMoreButton.setVisibility(View.GONE); // 新闻未找到时也隐藏按钮
             this.articleUrl = "";
         }
     }
 
-    // 【新增】一个辅助方法，用于重置UI状态
-    // 当加载新新闻时（尤其是在平板上切换新闻时），确保WebView被隐藏，摘要被显示
+    // 【修改】更新UI重置方法
     private void resetUIState() {
-        contentTextView.setVisibility(View.VISIBLE);
-        readMoreButton.setVisibility(View.VISIBLE);
+        // 显示摘要滚动视图，隐藏WebView
+        summaryScrollView.setVisibility(View.VISIBLE);
         webView.setVisibility(View.GONE);
-        webView.loadUrl("about:blank"); // 停止加载并清空WebView，防止旧内容闪现
+        webView.loadUrl("about:blank"); // 清空WebView
     }
 }

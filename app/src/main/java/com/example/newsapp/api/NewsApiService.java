@@ -7,7 +7,7 @@ import retrofit2.http.Query;
 
 public interface NewsApiService {
 
-    @GET("v4/top-headlines")
+    @GET("api/v4/top-headlines")
     Call<NewsApiResponse> getTopHeadlines(
             // 修正点：参数名从 topic 改为 category
             @Query("category") String category,   // category, 例如 general, world, business 等
