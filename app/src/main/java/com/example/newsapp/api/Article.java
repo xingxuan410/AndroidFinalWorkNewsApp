@@ -12,20 +12,45 @@ public class Article {
     private Source source;
 
     // --- Getters ---
-    public String getTitle() { return title; }
-    public String getDescription() { return description; }
-    public String getContent() { return content; }
-    public String getUrl() { return url; } // <-- 【关键新增】为url字段添加getter方法
-    public String getImage() { return image; } // <-- 【建议新增】图片的getter
-    public String getPublishedAt() { return publishedAt; }
-    public Source getSource() { return source; }
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public String getUrl() {
+        return url;
+    } // <-- 【关键新增】为url字段添加getter方法
+
+    public String getImage() {
+        return image;
+    } // <-- 【建议新增】图片的getter
+
+    public String getPublishedAt() {
+        return publishedAt;
+    }
+
+    public Source getSource() {
+        return source;
+    }
 
     // 内部类Source保持不变
     public static class Source {
         private String name;
         private String url; // <-- GNews的source对象里也有一个url，可以加上
 
-        public String getName() { return name; }
-        public String getUrl() { return url; }
+        public String getName() {
+            return name;
+        }
+
+        public String getUrl() {
+            return url;
+        }
     }
 }

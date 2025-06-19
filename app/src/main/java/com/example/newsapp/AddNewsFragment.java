@@ -78,7 +78,7 @@ public class AddNewsFragment extends Fragment {
         // 列表将通过 LiveData 自动更新，不再需要标志位。
         if (getView() != null) {
             boolean isLargeScreen = requireActivity().findViewById(R.id.news_detail_container) != null;
-            if(isLargeScreen){
+            if (isLargeScreen) {
                 requireActivity().getSupportFragmentManager().popBackStack();
             } else {
                 Navigation.findNavController(getView()).popBackStack();

@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
@@ -23,7 +24,9 @@ public class NewsAdapter extends ListAdapter<News, NewsAdapter.NewsViewHolder> {
 
     public interface OnNewsActionClickListener {
         void onNewsClick(News news);
+
         void onNewsLongClick(News news);
+
         void onNewsSelectionChange(News news);
     }
 

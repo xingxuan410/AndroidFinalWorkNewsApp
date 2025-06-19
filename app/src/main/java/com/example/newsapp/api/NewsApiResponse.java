@@ -10,8 +10,16 @@ public class NewsApiResponse {
     private List<Article> articles;
 
     // Getters
-    public String getStatus() { return status; }
+    public String getStatus() {
+        return status;
+    }
+
     // 修改点：对应修改getter方法
-    public int getTotalArticles() { return totalArticles; }
-    public List<Article> getArticles() { return articles; }
+    public int getTotalArticles() {
+        return totalArticles;
+    }
+
+    public List<Article> getArticles() {
+        return articles;
+    }
 }

@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -93,13 +94,13 @@ public class FavoritesFragment extends Fragment implements NewsAdapter.OnNewsAct
 
         favoritesViewModel.isSelectionMode.observe(getViewLifecycleOwner(), isSelection -> {
             selectionActionBar.setVisibility(isSelection ? View.VISIBLE : View.GONE);
-            if(favoritesViewModel.selectedNewsIds.getValue() != null) {
+            if (favoritesViewModel.selectedNewsIds.getValue() != null) {
                 adapter.setSelectionState(isSelection, favoritesViewModel.selectedNewsIds.getValue());
             }
         });
 
         favoritesViewModel.selectedNewsIds.observe(getViewLifecycleOwner(), selectedIds -> {
-            if(favoritesViewModel.isSelectionMode.getValue() != null) {
+            if (favoritesViewModel.isSelectionMode.getValue() != null) {
                 adapter.setSelectionState(favoritesViewModel.isSelectionMode.getValue(), selectedIds);
             }
         });

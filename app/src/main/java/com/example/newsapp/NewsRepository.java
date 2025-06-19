@@ -3,6 +3,7 @@ package com.example.newsapp;
 
 import android.app.Application;
 import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 
 import com.example.newsapp.api.Article;
@@ -36,9 +37,17 @@ public class NewsRepository {
         this.newsApiService = retrofit.create(NewsApiService.class);
     }
 
-    public LiveData<List<News>> getAllNews() { return newsDao.getAllNews(); }
-    public LiveData<News> getNewsById(int newsId) { return newsDao.getNewsById(newsId); }
-    public LiveData<List<News>> searchNews(String query) { return newsDao.searchNews(query); }
+    public LiveData<List<News>> getAllNews() {
+        return newsDao.getAllNews();
+    }
+
+    public LiveData<News> getNewsById(int newsId) {
+        return newsDao.getNewsById(newsId);
+    }
+
+    public LiveData<List<News>> searchNews(String query) {
+        return newsDao.searchNews(query);
+    }
 
     // [NEW]
     public LiveData<List<News>> getFavoriteNews() {
